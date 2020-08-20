@@ -1,0 +1,6 @@
+.
+session.vim
+tags
+build/
+deps/
+tests/instances/
