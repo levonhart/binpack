@@ -58,14 +58,14 @@ int main(int argc, char *argv[]){
 		return 2;
 	}
 
-	binpack_solution_firstfit(s);
+	binpack_firstfit(s);
 	char * str2 = binpack_solution_str(s);
 	printf("First fit solution (ascendent):\n%s", str2);
 	assert(binpack_solution_feasible(s));
 	eval = binpack_solution_eval(s);
 	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-n*std2);
 
-	binpack_solution_firstfit_order(s,order);
+	binpack_firstfit_order(s,order);
 	char * str3 = binpack_solution_str(s);
 	printf("First fit solution (descendent):\n%s", str3);
 	assert(binpack_solution_feasible(s));

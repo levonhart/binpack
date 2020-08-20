@@ -85,9 +85,8 @@ char * binpack_solution_str( const binpack_solution_t * restrict s );
 
 void binpack_solution_trivial( binpack_solution_t * restrict s );
 
-void binpack_solution_firstfit( binpack_solution_t * restrict s );
+void binpack_firstfit( binpack_solution_t * restrict s );
 
-void binpack_solution_firstfit_order( binpack_solution_t * restrict s,
-										size_t order[] );
+void binpack_firstfit_order( binpack_solution_t * restrict s, size_t order[] );
 
 #endif /* end of include guard: BINPACK_H_DJA8I3W6 */

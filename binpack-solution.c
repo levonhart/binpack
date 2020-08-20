@@ -209,7 +209,7 @@ void binpack_solution_trivial( binpack_solution_t * restrict s ) {
 	}
 }
 
-void binpack_solution_firstfit( binpack_solution_t * restrict s ) {
+void binpack_firstfit( binpack_solution_t * restrict s ) {
 	binpack_solution_reset(s);
 	for (size_t i = 0; i < s->prob->n; ++i) {
 		size_t j = 0;
@@ -220,7 +220,7 @@ void binpack_solution_firstfit( binpack_solution_t * restrict s ) {
 	}
 }
 
-void binpack_solution_firstfit_order( binpack_solution_t * restrict s,
+void binpack_firstfit_order( binpack_solution_t * restrict s,
 										size_t order[] ) {
 	binpack_solution_reset(s);
 	for (size_t k = 0; k < s->prob->n; ++k) {
