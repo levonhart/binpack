@@ -18,9 +18,9 @@ Building
 --------
 
 ### Prerequisites:
-	- `gcc`,`clang` or another C compiler
-	- `cmake >=3.15`
-	- `ninja` build tool recommended
+* `gcc`,`clang` or another C compiler
+* `cmake >=3.15`
+* `ninja` build tool recommended
 
 ### Building instructions:
 `git clone` this repository;
