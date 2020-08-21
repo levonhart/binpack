@@ -28,15 +28,17 @@ int main(int argc, char *argv[]){
 		perror("Create solution failed");
 		return 1;
 	}
-	binpack_solution_trivial(s);
+	binpack_solution_t * trivial = binpack_trivial(bp);
+	binpack_solution_copy(s,trivial);
+	binpack_solution_destroy(trivial);
 
 	char * str = binpack_solution_str(s);
 	printf("Trivial solution:\n%s", str);
-	assert(binpack_solution_feasible(s));
+	assert(binpack_is_feasible(s));
 	double eval = binpack_solution_eval(s);
 	printf("Evaluation: %.2lf (err:%.2lf)\n\n", eval, eval-n*std2);
 
-	if (eval - n*std2 < 0.01) {
+	if (eval - n*std2 > 0.01) {
 		fprintf(stderr, "Evaluation function broken\n");
 	}
 
@@ -52,23 +54,29 @@ int main(int argc, char *argv[]){
 
 	binpack_solution_reset(s);
 
-	printf("Empty solution:\n%zu {}\narray capacity: %zu\n", s->size, s->_max_size);
-	if (binpack_solution_feasible(s)) {
+	printf("Empty solution:\n%zu {%p}\narray capacity: %zu\n",
+			s->size, s->bins, s->_max_size);
+	if (binpack_is_feasible(s)) {
 		fprintf(stderr, "Feasibility test broken");
 		return 2;
 	}
+	binpack_solution_t * ff = binpack_firstfit(bp);
+	binpack_solution_copy(s,ff);
+	binpack_solution_destroy(ff);
 
-	binpack_firstfit(s);
 	char * str2 = binpack_solution_str(s);
 	printf("First fit solution (ascendent):\n%s", str2);
-	assert(binpack_solution_feasible(s));
+	assert(binpack_is_feasible(s));
 	eval = binpack_solution_eval(s);
 	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-n*std2);
 
-	binpack_firstfit_order(s,order);
+	binpack_solution_t * ffo = binpack_firstfit_order(bp,order);
+	binpack_solution_copy(s,ffo);
+	binpack_solution_destroy(ffo);
+
 	char * str3 = binpack_solution_str(s);
 	printf("First fit solution (descendent):\n%s", str3);
-	assert(binpack_solution_feasible(s));
+	assert(binpack_is_feasible(s));
 	eval = binpack_solution_eval(s);
 	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-n*std2);
 

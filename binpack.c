@@ -24,6 +24,7 @@ binpack_t * binpack_create( const size_t c,
 	bp->n = n;
 	bp->sum = 0;
 	bp->method = ILS;
+	bp->best = NULL;
 	bp->w = (int *) malloc(n * sizeof(int));
 	for (size_t i = 0; i < n; ++i) {
 		bp->w[i] = w[i];
@@ -52,6 +53,7 @@ binpack_t * binpack_read(const char * path){
 	}
 
 	bp->method = ILS;
+	bp->best = NULL;
 	bp->sum = 0;
 	bp->w = (int *) malloc(bp->n * sizeof(int));
 
@@ -69,22 +71,71 @@ void binpack_destroy(binpack_t * bp){
 	if (bp != NULL) {
 		if (bp->w != NULL)
 			free(bp->w);
+		if (bp->best != NULL)
+			free(bp->best);
 		free(bp);
 	}
 }
 
-inline int binpack_lowerbound(const binpack_t * restrict bp){
-	return (bp->sum % bp->c) == 0 ?
-			bp->sum / bp->c :
-			bp->sum / bp->c + 1;
+size_t binpack_set_start( binpack_t * restrict bp,
+							binpack_solution_t * restrict s) {
+	if (bp == NULL || s == NULL) return BP_EINVAL;
+	size_t size = 0;
+	if (bp->best == NULL) bp->best = binpack_solution_create(bp);
+	else size = bp->best->size;
+	binpack_solution_copy(bp->best,s);
+	return size;
 }
 
+binpack_solution_t * binpack_get_best( binpack_t * bp ) {
+	if (bp == NULL) return NULL;
+	binpack_solution_t * s = binpack_solution_create(bp);
+	binpack_solution_copy(bp->best,s);
+	return s;
+}
+
+binpack_solution_t * binpack_trivial( const binpack_t * bp ) {
+	/* binpack_solution_reset(s); */
+	binpack_solution_t  * s = binpack_solution_create( bp );
+	for (size_t i = 0; i < s->prob->n; ++i) {
+		binpack_solution_add(s,i,i);
+	}
+	return s;
+}
+
+binpack_solution_t * binpack_firstfit( const binpack_t * bp ) {
+	/* binpack_solution_reset(s); */
+	binpack_solution_t  * s = binpack_solution_create( bp );
+	for (size_t i = 0; i < s->prob->n; ++i) {
+		size_t j = 0;
+		while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) {
+				j++;
+		}
+		binpack_solution_add(s,i,j);
+	}
+	return s;
+}
+
+binpack_solution_t * binpack_firstfit_order( const binpack_t * restrict bp,
+															size_t order[] ) {
+	/* binpack_solution_reset(s); */
+	binpack_solution_t  * s = binpack_solution_create( bp );
+	for (size_t k = 0; k < s->prob->n; ++k) {
+		size_t i = order[k];
+		size_t j = 0;
+		while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) {
+				j++;
+		}
+		binpack_solution_add(s,i,j);
+	}
+	return s;
+}
 
 /* ======================================================================== */
 /* ======================== convert to string routines ==================== */
 /* ======================================================================== */
 
-char * binpack_str(const binpack_t * restrict bp){
+char * binpack_str(const binpack_t * bp){
 	size_t size = BP_BUFSIZ;
 	size_t length = 0;
 	char * str = (char *) malloc( size*sizeof(char) );
@@ -103,7 +154,7 @@ char * binpack_str(const binpack_t * restrict bp){
 	return str;
 }
 
-static char * binpack_bin_str( const binpack_bin_t * restrict bin ){
+static char * binpack_bin_str( const binpack_bin_t * bin ){
 	size_t size = BP_BUFSIZ;
 	size_t length = 0;
 	char * str = (char *) malloc( size*sizeof(char) );
@@ -118,7 +169,7 @@ static char * binpack_bin_str( const binpack_bin_t * restrict bin ){
 	return str;
 }
 
-char * binpack_solution_str( const binpack_solution_t * restrict s ){
+char * binpack_solution_str( const binpack_solution_t * s ){
 	size_t size = BP_BUFSIZ;
 	size_t length = 0;
 	char * str = (char *) malloc( size*sizeof(char) );

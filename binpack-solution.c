@@ -2,7 +2,7 @@
 #include <assert.h>
 #include "binpack.h"
 
-static inline void binpack_bin_resize( binpack_bin_t * restrict b, size_t size) {
+static inline void binpack_bin_resize( binpack_bin_t * b, size_t size) {
 	assert(size > b->_max_size);
 	size_t * old = b->items;
 	b->items = (size_t *) malloc( size * sizeof(size_t) );
@@ -16,7 +16,7 @@ static inline void binpack_bin_resize( binpack_bin_t * restrict b, size_t size) 
 }
 
 /* The following two functions do not update the load of b */
-static inline void binpack_bin_add( binpack_bin_t * restrict b, const size_t i ){
+static inline void binpack_bin_add( binpack_bin_t * b, const size_t i ){
 	assert(b != NULL);
 	if (b->items == NULL) {
 		b->items = (size_t *) malloc(sizeof(size_t));
@@ -26,7 +26,7 @@ static inline void binpack_bin_add( binpack_bin_t * restrict b, const size_t i )
 	b->items[b->size++] = i;
 }
 
-static inline void binpack_bin_remove( binpack_bin_t * restrict b, const size_t i ) {
+static inline void binpack_bin_remove( binpack_bin_t * b, const size_t i ) {
 	assert(b != NULL && b->items != NULL);
 	size_t j = 0;
 	while (j < b->size && b->items[j] != i) j++;
@@ -36,7 +36,7 @@ static inline void binpack_bin_remove( binpack_bin_t * restrict b, const size_t 
 		binpack_bin_resize(b, b->_max_size/2);
 }
 
-binpack_solution_t * binpack_solution_create( const binpack_t * restrict bp ){
+binpack_solution_t * binpack_solution_create( const binpack_t * bp ){
 	binpack_solution_t * s =
 		(binpack_solution_t *) malloc( sizeof(binpack_solution_t) );
 	s->prob = bp;
@@ -63,8 +63,7 @@ void binpack_solution_destroy( binpack_solution_t * s ){
 	}
 }
 
-void inline binpack_solution_resize( binpack_solution_t * restrict s,
-															size_t size) {
+void inline binpack_solution_resize( binpack_solution_t * s, size_t size) {
 	assert(size > s->_max_size);
 	binpack_bin_t * old = s->bins;
 	s->bins = (binpack_bin_t *) malloc( size * sizeof(binpack_bin_t) );
@@ -78,9 +77,8 @@ void inline binpack_solution_resize( binpack_solution_t * restrict s,
 }
 
 
-size_t binpack_solution_add( binpack_solution_t * restrict s,
-												const size_t i,
-												const size_t b ) {
+size_t binpack_solution_add( binpack_solution_t * s, const size_t i,
+													const size_t b ) {
 	if (s->bin_of[i] != (BP_NOTSET)) return BP_EINVAL;
 	size_t dest = b;
 
@@ -98,8 +96,7 @@ size_t binpack_solution_add( binpack_solution_t * restrict s,
 	return dest;
 }
 
-size_t binpack_solution_remove( binpack_solution_t * restrict s,
-												const size_t i ) {
+size_t binpack_solution_remove( binpack_solution_t * s, const size_t i ) {
  	if (s->bin_of[i] != BP_NOTSET) return BP_EINVAL;
 	binpack_bin_t * b = s->bins + s->bin_of[i]; // b= &s->bins[ s->bin_of[i] ];
 	size_t k = s->bin_of[i];
@@ -139,8 +136,9 @@ void binpack_solution_reset( binpack_solution_t * s ) {
 	}
 }
 
-binpack_solution_t * binpack_solution_copy( binpack_solution_t * dest,
+binpack_solution_t * binpack_solution_copy( binpack_solution_t * restrict dest,
 									const binpack_solution_t * restrict s ) {
+	if (s == NULL || dest == NULL) return NULL;
 	binpack_solution_reset( dest );
 	if (dest->prob != s->prob) return NULL;
 
@@ -156,9 +154,7 @@ binpack_solution_t * binpack_solution_copy( binpack_solution_t * dest,
 	return dest;
 }
 
-void binpack_solution_swap( binpack_solution_t * restrict s,
-														size_t a,
-														size_t b ) {
+void binpack_solution_swap( binpack_solution_t * s, size_t a, size_t b ) {
 	size_t temp = s->bin_of[a];
 	binpack_bin_t * ba = s->bins + s->bin_of[a];
 	binpack_bin_t * bb = s->bins + s->bin_of[b];
@@ -174,7 +170,7 @@ void binpack_solution_swap( binpack_solution_t * restrict s,
 	s->bin_of[b] = temp;
 }
 
-double binpack_solution_eval( const binpack_solution_t * restrict s ) {
+double binpack_solution_eval( const binpack_solution_t * s ) {
 	double avg = 1.0* s->prob->sum / s->size;
 	double std = 0;
 	for (size_t i = 0; i < s->size; ++i) {
@@ -186,7 +182,7 @@ double binpack_solution_eval( const binpack_solution_t * restrict s ) {
 	return std;
 }
 
-_Bool binpack_solution_feasible( const binpack_solution_t * restrict s ) {
+_Bool binpack_is_feasible( const binpack_solution_t * s ) {
 	binpack_bin_t * b;
 	size_t count = 0;
 	for (size_t i = 0; i < s->size; ++i) {
@@ -202,33 +198,33 @@ _Bool binpack_solution_feasible( const binpack_solution_t * restrict s ) {
 }
 
 
-void binpack_solution_trivial( binpack_solution_t * restrict s ) {
-	binpack_solution_reset(s);
-	for (size_t i = 0; i < s->prob->n; ++i) {
-		binpack_solution_add(s,i,i);
-	}
-}
-
-void binpack_firstfit( binpack_solution_t * restrict s ) {
-	binpack_solution_reset(s);
-	for (size_t i = 0; i < s->prob->n; ++i) {
-		size_t j = 0;
-		while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) {
-				j++;
-		}
-		binpack_solution_add(s,i,j);
-	}
-}
-
-void binpack_firstfit_order( binpack_solution_t * restrict s,
-										size_t order[] ) {
-	binpack_solution_reset(s);
-	for (size_t k = 0; k < s->prob->n; ++k) {
-		size_t i = order[k];
-		size_t j = 0;
-		while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) {
-				j++;
-		}
-		binpack_solution_add(s,i,j);
-	}
-}
+/* void binpack_solution_trivial( binpack_solution_t * restrict s ) { */
+/*     binpack_solution_reset(s); */
+/*     for (size_t i = 0; i < s->prob->n; ++i) { */
+/*         binpack_solution_add(s,i,i); */
+/*     } */
+/* } */
+/*  */
+/* void binpack_firstfit( binpack_solution_t * restrict s ) { */
+/*     binpack_solution_reset(s); */
+/*     for (size_t i = 0; i < s->prob->n; ++i) { */
+/*         size_t j = 0; */
+/*         while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) { */
+/*                 j++; */
+/*         } */
+/*         binpack_solution_add(s,i,j); */
+/*     } */
+/* } */
+/*  */
+/* void binpack_firstfit_order( binpack_solution_t * restrict s, */
+/*                                         size_t order[] ) { */
+/*     binpack_solution_reset(s); */
+/*     for (size_t k = 0; k < s->prob->n; ++k) { */
+/*         size_t i = order[k]; */
+/*         size_t j = 0; */
+/*         while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) { */
+/*                 j++; */
+/*         } */
+/*         binpack_solution_add(s,i,j); */
+/*     } */
+/* } */
