@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "binpack.h"
 
@@ -36,9 +37,10 @@ int main(int argc, char *argv[]){
 	printf("Trivial solution:\n%s", str);
 	assert(binpack_is_feasible(s));
 	double eval = binpack_solution_eval(s);
-	printf("Evaluation: %.2lf (err:%.2lf)\n\n", eval, eval-n*std2);
+	/* printf("Evaluation: %.2lf (err:%.2lf)\n\n", eval, eval-n*std2); */
+	printf("Evaluation: %.2lf (err:%.2lf)\n\n", eval, eval-std2);
 
-	if (eval - n*std2 > 0.01) {
+	if (eval - std2 > 0.01) {
 		fprintf(stderr, "Evaluation function broken\n");
 	}
 
@@ -68,7 +70,7 @@ int main(int argc, char *argv[]){
 	printf("First fit solution (ascendent):\n%s", str2);
 	assert(binpack_is_feasible(s));
 	eval = binpack_solution_eval(s);
-	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-n*std2);
+	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-std2);
 
 	binpack_solution_t * ffo = binpack_firstfit_order(bp,order);
 	binpack_solution_copy(s,ffo);
@@ -78,8 +80,9 @@ int main(int argc, char *argv[]){
 	printf("First fit solution (descendent):\n%s", str3);
 	assert(binpack_is_feasible(s));
 	eval = binpack_solution_eval(s);
-	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-n*std2);
+	printf("Evaluation: %.2lf (imp:%.2lf)\n\n",eval, eval-std2);
 
+	free(str); free(str2); free(str3);
 	binpack_solution_destroy(s);
 	binpack_destroy(bp);
 	return 0;

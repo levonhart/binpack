@@ -3,7 +3,6 @@
 #include "binpack.h"
 
 static inline void binpack_bin_resize( binpack_bin_t * b, size_t size) {
-	assert(size > b->_max_size);
 	size_t * old = b->items;
 	b->items = (size_t *) malloc( size * sizeof(size_t) );
 	if (old != NULL) {
@@ -97,7 +96,7 @@ size_t binpack_solution_add( binpack_solution_t * s, const size_t i,
 }
 
 size_t binpack_solution_remove( binpack_solution_t * s, const size_t i ) {
- 	if (s->bin_of[i] != BP_NOTSET) return BP_EINVAL;
+ 	if (s->bin_of[i] == BP_NOTSET) return BP_EINVAL;
 	binpack_bin_t * b = s->bins + s->bin_of[i]; // b= &s->bins[ s->bin_of[i] ];
 	size_t k = s->bin_of[i];
 
@@ -155,30 +154,28 @@ binpack_solution_t * binpack_solution_copy( binpack_solution_t * restrict dest,
 }
 
 void binpack_solution_swap( binpack_solution_t * s, size_t a, size_t b ) {
-	size_t temp = s->bin_of[a];
 	binpack_bin_t * ba = s->bins + s->bin_of[a];
 	binpack_bin_t * bb = s->bins + s->bin_of[b];
 	binpack_bin_remove(ba, a);
 	binpack_bin_remove(bb, b);
-	ba->load -= s->prob->w[a];
-	bb->load -= s->prob->w[b];
 	binpack_bin_add(ba, b);
-	ba->load += s->prob->w[b];
+	ba->load += s->prob->w[b] - s->prob->w[a];
 	binpack_bin_add(bb, a);
-	bb->load += s->prob->w[a];
+	bb->load += s->prob->w[a] - s->prob->w[b];
+	size_t temp = s->bin_of[a];
 	s->bin_of[a] = s->bin_of[b];
 	s->bin_of[b] = temp;
 }
 
 double binpack_solution_eval( const binpack_solution_t * s ) {
-	double avg = 1.0* s->prob->sum / s->size;
+	double avg = (double) s->prob->sum / s->size;
 	double std = 0;
 	for (size_t i = 0; i < s->size; ++i) {
 		std += s->bins[i].load * s->bins[i].load;
 	}
-	/* std /= s->size; */
-	/* std -= avg*avg; */
-	std -= s->size * avg*avg;
+	std /= s->size;
+	std -= avg*avg;
+	/* std -= s->size * avg*avg; */
 	return std;
 }
 

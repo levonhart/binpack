@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include "binpack.h"
 
@@ -41,6 +42,7 @@ int main(int argc, char *argv[]){
 
 	printf("A copy of bp:\n%s\n", str2);
 
+	free(str); free(str2);
 	binpack_destroy(bp); binpack_destroy(bp2);
 	return 0;
 }

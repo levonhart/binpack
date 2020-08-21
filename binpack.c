@@ -23,7 +23,7 @@ binpack_t * binpack_create( const size_t c,
 	bp->c = c;
 	bp->n = n;
 	bp->sum = 0;
-	bp->method = ILS;
+	bp->method = BP_DMETHD;
 	bp->best = NULL;
 	bp->w = (int *) malloc(n * sizeof(int));
 	for (size_t i = 0; i < n; ++i) {
@@ -90,7 +90,7 @@ size_t binpack_set_start( binpack_t * restrict bp,
 binpack_solution_t * binpack_get_best( binpack_t * bp ) {
 	if (bp == NULL) return NULL;
 	binpack_solution_t * s = binpack_solution_create(bp);
-	binpack_solution_copy(bp->best,s);
+	binpack_solution_copy(s,bp->best);
 	return s;
 }
 

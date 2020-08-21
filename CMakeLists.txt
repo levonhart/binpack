@@ -5,7 +5,7 @@ project(BinPacking VERSION 0.0.0 LANGUAGES C
 
 add_library(binpack OBJECT)
 target_sources( binpack
-				PRIVATE "binpack.c" "binpack-solution.c"
+				PRIVATE "binpack.c" "binpack-solution.c" "binpack-search.c"
 				INTERFACE "binpack.h")
 
 add_subdirectory(tests)
@@ -24,6 +24,7 @@ target_link_libraries( benchmark PUBLIC binpack)
 
 add_test(readfile "${BinPacking_SOURCE_DIR}/build/tests/readfile" "${BinPacking_SOURCE_DIR}/tests/instances/Scholl/Scholl_1/N1C1W1_A.txt")
 add_test(solution "${BinPacking_SOURCE_DIR}/build/tests/solution")
+add_test(search "${BinPacking_SOURCE_DIR}/build/tests/solution")
 if(TEST_ON)
 	enable_testing()
 endif()

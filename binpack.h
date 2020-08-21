@@ -5,6 +5,8 @@
 #define BP_EINVAL ~((size_t)0x00)
 #define BP_NOTSET ~((size_t)0x01)
 #define BP_BUFSIZ 512
+#define BP_DMETHD VNS
+#define BP_MINIMP 0.0002
 
 typedef enum _search {
 	HC,
@@ -105,6 +107,10 @@ binpack_solution_t * binpack_firstfit( const binpack_t * bp );
 
 binpack_solution_t * binpack_firstfit_order( const binpack_t * restrict bp, size_t order[] );
 
-binpack_solution_t * binpack_search( binpack_t * bp );
+long int binpack_search( binpack_t * bp, search_t method );
+
+inline long int binpack_solve( binpack_t * bp ) {
+	return binpack_search( bp, bp->method );
+}
 
 #endif /* end of include guard: BINPACK_H_DJA8I3W6 */
