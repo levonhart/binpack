@@ -7,6 +7,7 @@
 #define BP_BUFSIZ 512
 #define BP_DMETHD VNS
 #define BP_MINIMP 0.0002
+#define BP_MAXITR 4
 
 typedef enum _search {
 	HC,
@@ -22,6 +23,7 @@ typedef struct _binpack {
 	size_t n;
 	long int sum;
 	search_t method;
+	unsigned short max_iter;
 	struct _binpack_solution * best;
 } binpack_t;
 
