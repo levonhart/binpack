@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.15...3.19)
 
-project(BinPacking VERSION 0.0.0 LANGUAGES C
+project(BinPacking VERSION 0.1.0 LANGUAGES C
 		DESCRIPTION "Bin Packing Problem heuristics implementations.")
 
 add_library(binpack OBJECT)

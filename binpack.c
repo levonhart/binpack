@@ -99,7 +99,7 @@ binpack_solution_t * binpack_get_best( binpack_t * bp ) {
 binpack_solution_t * binpack_trivial( const binpack_t * bp ) {
 	/* binpack_solution_reset(s); */
 	binpack_solution_t  * s = binpack_solution_create( bp );
-	for (size_t i = 0; i < s->prob->n; ++i) {
+	for (size_t i = 0; i < s->env->n; ++i) {
 		binpack_solution_add(s,i,i);
 	}
 	return s;
@@ -108,9 +108,9 @@ binpack_solution_t * binpack_trivial( const binpack_t * bp ) {
 binpack_solution_t * binpack_firstfit( const binpack_t * bp ) {
 	/* binpack_solution_reset(s); */
 	binpack_solution_t  * s = binpack_solution_create( bp );
-	for (size_t i = 0; i < s->prob->n; ++i) {
+	for (size_t i = 0; i < s->env->n; ++i) {
 		size_t j = 0;
-		while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) {
+		while (j < s->size && s->env->w[i] + s->bins[j].load > s->env->c) {
 				j++;
 		}
 		binpack_solution_add(s,i,j);
@@ -122,10 +122,10 @@ binpack_solution_t * binpack_firstfit_order( const binpack_t * restrict bp,
 															size_t order[] ) {
 	/* binpack_solution_reset(s); */
 	binpack_solution_t  * s = binpack_solution_create( bp );
-	for (size_t k = 0; k < s->prob->n; ++k) {
+	for (size_t k = 0; k < s->env->n; ++k) {
 		size_t i = order[k];
 		size_t j = 0;
-		while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) {
+		while (j < s->size && s->env->w[i] + s->bins[j].load > s->env->c) {
 				j++;
 		}
 		binpack_solution_add(s,i,j);

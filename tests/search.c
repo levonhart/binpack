@@ -84,7 +84,24 @@ int main(int argc, char *argv[]){
 
 	if (binpack_search(NULL,ILS) > 0) {
 		perror("Wrong Value for BP_INVAL");
+		return -1;
 	}
+
+	binpack_reset(bp);
+
+	niter = binpack_search(bp, VNS);
+	assert(binpack_is_feasible(bp->best));
+
+	binpack_solution_destroy(s);
+	s = binpack_get_best(bp);
+	if(binpack_is_feasible(s) == 0){
+		perror("VNS failed");
+		return 5;
+	}
+	free(str); str = binpack_solution_str(s);
+	printf("VNS[%d] solution:\n%s", niter, str);
+	eval = binpack_solution_eval(s);
+	printf("Evaluation: %.2lf (err:%.2lf)\n\n", eval, eval-std2);
 
 	binpack_solution_destroy(s);
 	binpack_destroy(bp);

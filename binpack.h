@@ -8,6 +8,7 @@
 #define BP_DMETHD VNS
 #define BP_MINIMP 0.0002
 #define BP_MAXITR 4
+#define BP_DRDSWP 10
 
 typedef enum _search {
 	HC,
@@ -25,6 +26,7 @@ typedef struct _binpack {
 	search_t method;
 	unsigned short max_iter;
 	struct _binpack_solution * best;
+	size_t * index;
 } binpack_t;
 
 binpack_t * binpack_create( const size_t c, const size_t n, const int w[] );
@@ -55,7 +57,7 @@ typedef struct _binpack_bin {
 } binpack_bin_t;
 
 typedef struct _binpack_solution {
-	const binpack_t * prob;
+	const binpack_t * env;
 	binpack_bin_t * bins;
 	size_t * bin_of;
 	size_t size;

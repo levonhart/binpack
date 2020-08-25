@@ -38,7 +38,7 @@ static inline void binpack_bin_remove( binpack_bin_t * b, const size_t i ) {
 binpack_solution_t * binpack_solution_create( const binpack_t * bp ){
 	binpack_solution_t * s =
 		(binpack_solution_t *) malloc( sizeof(binpack_solution_t) );
-	s->prob = bp;
+	s->env = bp;
 	s->bins = NULL;
 	s->size = 0;
 	s->_max_size = 0;
@@ -90,7 +90,7 @@ size_t binpack_solution_add( binpack_solution_t * s, const size_t i,
 	}
 
 	binpack_bin_add(&s->bins[dest], i);
-	s->bins[dest].load += s->prob->w[i];
+	s->bins[dest].load += s->env->w[i];
 	s->bin_of[i] = dest;
 	return dest;
 }
@@ -101,7 +101,7 @@ size_t binpack_solution_remove( binpack_solution_t * s, const size_t i ) {
 	size_t k = s->bin_of[i];
 
 	binpack_bin_remove(b, i);
-	b->load -= s->prob->w[i];
+	b->load -= s->env->w[i];
 	s->bin_of[i] = BP_NOTSET;
 
 	if (b->size == 0) {
@@ -128,7 +128,7 @@ void binpack_solution_reset( binpack_solution_t * s ) {
 			s->bins = NULL;
 		}
 
-		for (i = 0; i < s->prob->n; ++i) {
+		for (i = 0; i < s->env->n; ++i) {
 			s->bin_of[i] = BP_NOTSET;
 		}
 		s->size = 0; s->_max_size = 0;
@@ -139,7 +139,7 @@ binpack_solution_t * binpack_solution_copy( binpack_solution_t * restrict dest,
 									const binpack_solution_t * restrict s ) {
 	if (s == NULL || dest == NULL) return NULL;
 	binpack_solution_reset( dest );
-	if (dest->prob != s->prob) return NULL;
+	if (dest->env != s->env) return NULL;
 
 	dest->bins = (binpack_bin_t *) calloc (s->size, sizeof(binpack_bin_t));
 	dest->_max_size = s->size;
@@ -159,16 +159,16 @@ void binpack_solution_swap( binpack_solution_t * s, size_t a, size_t b ) {
 	binpack_bin_remove(ba, a);
 	binpack_bin_remove(bb, b);
 	binpack_bin_add(ba, b);
-	ba->load += s->prob->w[b] - s->prob->w[a];
+	ba->load += s->env->w[b] - s->env->w[a];
 	binpack_bin_add(bb, a);
-	bb->load += s->prob->w[a] - s->prob->w[b];
+	bb->load += s->env->w[a] - s->env->w[b];
 	size_t temp = s->bin_of[a];
 	s->bin_of[a] = s->bin_of[b];
 	s->bin_of[b] = temp;
 }
 
 double binpack_solution_eval( const binpack_solution_t * s ) {
-	double avg = (double) s->prob->sum / s->size;
+	double avg = (double) s->env->sum / s->size;
 	double std = 0;
 	for (size_t i = 0; i < s->size; ++i) {
 		std += s->bins[i].load * s->bins[i].load;
@@ -184,29 +184,29 @@ _Bool binpack_is_feasible( const binpack_solution_t * s ) {
 	size_t count = 0;
 	for (size_t i = 0; i < s->size; ++i) {
 		b = &s->bins[i];
-		if (b->load > s->prob->c) return 0;
+		if (b->load > s->env->c) return 0;
 		for (size_t j = 0; j < b->size; ++j) {
 			if (s->bin_of[ b->items[j] ] != i) return 0;
 			count++;
 		}
 	}
-	if (count < s->prob->n) return 0;
+	if (count < s->env->n) return 0;
 	return 1;
 }
 
 
 /* void binpack_solution_trivial( binpack_solution_t * restrict s ) { */
 /*     binpack_solution_reset(s); */
-/*     for (size_t i = 0; i < s->prob->n; ++i) { */
+/*     for (size_t i = 0; i < s->env->n; ++i) { */
 /*         binpack_solution_add(s,i,i); */
 /*     } */
 /* } */
 /*  */
 /* void binpack_firstfit( binpack_solution_t * restrict s ) { */
 /*     binpack_solution_reset(s); */
-/*     for (size_t i = 0; i < s->prob->n; ++i) { */
+/*     for (size_t i = 0; i < s->env->n; ++i) { */
 /*         size_t j = 0; */
-/*         while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) { */
+/*         while (j < s->size && s->env->w[i] + s->bins[j].load > s->env->c) { */
 /*                 j++; */
 /*         } */
 /*         binpack_solution_add(s,i,j); */
@@ -216,10 +216,10 @@ _Bool binpack_is_feasible( const binpack_solution_t * s ) {
 /* void binpack_firstfit_order( binpack_solution_t * restrict s, */
 /*                                         size_t order[] ) { */
 /*     binpack_solution_reset(s); */
-/*     for (size_t k = 0; k < s->prob->n; ++k) { */
+/*     for (size_t k = 0; k < s->env->n; ++k) { */
 /*         size_t i = order[k]; */
 /*         size_t j = 0; */
-/*         while (j < s->size && s->prob->w[i] + s->bins[j].load > s->prob->c) { */
+/*         while (j < s->size && s->env->w[i] + s->bins[j].load > s->env->c) { */
 /*                 j++; */
 /*         } */
 /*         binpack_solution_add(s,i,j); */
