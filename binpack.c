@@ -24,7 +24,7 @@ binpack_t * binpack_create( const size_t c,
 	bp->n = n;
 	bp->sum = 0;
 	bp->method = BP_DMETHD;
-	bp->max_iter = BP_MAXITR;
+	bp->parameters = (struct _search_param){.max_iter = BP_MAXITR};
 	bp->best = NULL;
 	bp->w = (int *) malloc(n * sizeof(int));
 	for (size_t i = 0; i < n; ++i) {
@@ -56,7 +56,7 @@ binpack_t * binpack_read(const char * path){
 	bp->method = ILS;
 	bp->best = NULL;
 	bp->sum = 0;
-	bp->max_iter = BP_MAXITR;
+	bp->parameters = (struct _search_param){.max_iter = BP_MAXITR};
 	bp->w = (int *) malloc(bp->n * sizeof(int));
 
 	for (size_t i = 0; i < bp->n; ++i) {

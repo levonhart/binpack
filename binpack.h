@@ -2,13 +2,13 @@
 #define BINPACK_H_DJA8I3W6
 
 #include <stdint.h>
-#define BP_EINVAL ~((size_t)0x00)
-#define BP_NOTSET ~((size_t)0x01)
+#define BP_EINVAL -0x01ul // 0xffffffffffffffff for uint64_t, -1 for signed int
+#define BP_NOTSET -0x02ul // 0xfffffffffffffffe for uint64_t, -2 for signed int
 #define BP_BUFSIZ 512
 #define BP_DMETHD VNS
 #define BP_MINIMP 0.0002
 #define BP_MAXITR 4
-#define BP_DRDSWP 10
+#define BP_DRDSWP 10 // Default random swaps for VNS
 
 typedef enum _search {
 	HC,
@@ -18,15 +18,25 @@ typedef enum _search {
 	VNS
 } search_t;
 
+typedef struct _search_param {
+		unsigned short max_iter;
+		union {
+			struct { // ILS
+				int k;
+			};
+		};
+} search_param_t;
+
 typedef struct _binpack {
 	int c;
 	int * w;
 	size_t n;
 	long int sum;
-	search_t method;
-	unsigned short max_iter;
 	struct _binpack_solution * best;
-	size_t * index;
+
+	search_t method;
+	search_param_t parameters; /* search parameters */
+	// size_t * index;
 } binpack_t;
 
 binpack_t * binpack_create( const size_t c, const size_t n, const int w[] );

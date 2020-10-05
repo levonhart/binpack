@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include "binpack.h"
 
@@ -179,19 +180,19 @@ double binpack_solution_eval( const binpack_solution_t * s ) {
 	return std;
 }
 
-_Bool binpack_is_feasible( const binpack_solution_t * s ) {
+bool binpack_is_feasible( const binpack_solution_t * s ) {
 	binpack_bin_t * b;
-	size_t count = 0;
+	size_t count = false;
 	for (size_t i = 0; i < s->size; ++i) {
 		b = &s->bins[i];
-		if (b->load > s->env->c) return 0;
+		if (b->load > s->env->c) return false;
 		for (size_t j = 0; j < b->size; ++j) {
-			if (s->bin_of[ b->items[j] ] != i) return 0;
+			if (s->bin_of[ b->items[j] ] != i) return false;
 			count++;
 		}
 	}
-	if (count < s->env->n) return 0;
-	return 1;
+	if (count < s->env->n) return false;
+	return true;
 }
 
 

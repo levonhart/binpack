@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdbool.h>
 #include <assert.h>
 #include "binpack.h"
 
@@ -18,9 +19,9 @@ long int binpack_search( binpack_t * bp, search_t method ) {
 	return search[method](bp);
 }
 
-static _Bool first_imp_nh1( binpack_solution_t * s );
-static _Bool first_imp_nh2( binpack_solution_t * s );
-static _Bool first_imp_nh3( binpack_solution_t * s );
+static bool first_imp_nh1( binpack_solution_t * s );
+static bool first_imp_nh2( binpack_solution_t * s );
+static bool first_imp_nh3( binpack_solution_t * s );
 
 static inline void shuffle( size_t n, size_t v[] );
 
@@ -29,7 +30,7 @@ static void random_swaps( binpack_solution_t * s, unsigned int p );
 
 /* return number of iteration -1 ( 0 if no improvement were found ) */
 static long int hc_run( binpack_t * bp ) {
-	_Bool imp = 0; long int i = 0;
+	bool imp = false; long int i = 0;
 	do {
 		i += imp = first_imp_nh1(bp->best);
 	} while (imp);
@@ -38,7 +39,7 @@ static long int hc_run( binpack_t * bp ) {
 
 /* return number of iteration -1 ( 0 if no improvement were found ) */
 static long int vnd_run( binpack_t * bp ) {
-	_Bool imp = 0; long int i = 0;
+	bool imp = false; long int i = 0;
 	do {
 		i += imp = first_imp_nh1(bp->best);
 		if (!imp) i += imp = first_imp_nh2(bp->best);
@@ -64,10 +65,10 @@ static long int vns_run( binpack_t * bp ) {
 		   mean = (double) bp->sum / best->size;
 	unsigned short nbhd = 1,
 				   count = 0,
-				   nc = bp->max_iter/4;
+				   nc = bp->parameters.max_iter/4;
 	size_t lb = binpack_lowerbound(bp);
 	if (lb < best->size) {
-		for (i = 0; i < bp->max_iter; ++i) {
+		for (i = 0; i < bp->parameters.max_iter; ++i) {
 			if (nbhd == 1) {
 				open_bin(curr);
 			} else if (nbhd == 2) {
@@ -103,7 +104,7 @@ static inline double std_diff( double mean, int before, int after ) {
 	return (after - mean)*(after - mean) - (before - mean)*(before - mean);
 }
 
-static _Bool first_imp_nh1( binpack_solution_t * s ) {
+static bool first_imp_nh1( binpack_solution_t * s ) {
 	binpack_bin_t * bin = s->bins;
 	size_t * bin_of = s->bin_of;
 	size_t i, j, bi;
@@ -123,15 +124,15 @@ static _Bool first_imp_nh1( binpack_solution_t * s ) {
 					binpack_solution_remove(s, i);
 					binpack_solution_add(s, i, j);
 					assert(binpack_is_feasible(s));
-					return 1;
+					return true;
 				}
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
-static _Bool first_imp_nh2( binpack_solution_t * s ) {
+static bool first_imp_nh2( binpack_solution_t * s ) {
 	binpack_bin_t * bin = s->bins;
 	size_t bi, bj, i, j, ii, ij;
 	int * w = s->env->w;
@@ -153,17 +154,17 @@ static _Bool first_imp_nh2( binpack_solution_t * s ) {
 						if (imp > BP_MINIMP * mean*mean) {
 							binpack_solution_swap(s, i, j);
 							assert(binpack_is_feasible(s));
-							return 1;
+							return true;
 						}
 					}
 				}
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
-static _Bool first_imp_nh3( binpack_solution_t * s ) {
+static bool first_imp_nh3( binpack_solution_t * s ) {
 	binpack_bin_t * bin = s->bins;
 	size_t * bin_of = s->bin_of;
 	size_t i, j, k, ij, ik, b, bi;
@@ -190,7 +191,7 @@ static _Bool first_imp_nh3( binpack_solution_t * s ) {
 								binpack_solution_swap(s, i, j);
 								binpack_solution_add(s, k, bi);
 								assert(binpack_is_feasible(s));
-								return 1;
+								return true;
 							}
 						}
 					}
@@ -198,7 +199,7 @@ static _Bool first_imp_nh3( binpack_solution_t * s ) {
 			}
 		}
 	}
-	return 0;
+	return false;
 }
 
 static inline void shuffle( size_t n, size_t v[] ) {
