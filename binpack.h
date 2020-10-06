@@ -6,9 +6,8 @@
 #define BP_NOTSET -0x02ul // 0xfffffffffffffffe for uint64_t, -2 for signed int
 #define BP_BUFSIZ 512
 #define BP_DMETHD VNS
-#define BP_MINIMP 0.0002
+#define BP_MINIMP 1e-4
 #define BP_MAXITR 4
-#define BP_DRDSWP 10 // Default random swaps for VNS
 
 typedef enum _search {
 	HC,

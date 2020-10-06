@@ -3,6 +3,8 @@
 #include <assert.h>
 #include "binpack.h"
 
+#define BP_DRDSWP 10 // Default random swaps for VNS
+
 static long int hc_run( binpack_t * bp );
 static long int vnd_run( binpack_t * bp );
 static long int ils_run( binpack_t * bp );
@@ -82,7 +84,7 @@ static long int vns_run( binpack_t * bp ) {
 			eval = binpack_solution_eval(curr);
 			if (curr->size < best->size ||
 					(curr->size == best->size &&
-					 eval - best_eval > BP_MINIMP * mean*mean) ) {
+					 eval - best_eval > BP_MINIMP /* * mean*mean */) ) {
 				binpack_solution_copy(best, curr);
 				nbhd = 1; count = 0;
 				best_eval = eval;
@@ -120,7 +122,7 @@ static bool first_imp_nh1( binpack_solution_t * s ) {
 										bin[bi].load - w[i] /*after*/ );
 				imp += std_diff(mean,	bin[j].load /*before*/,
 										bin[j].load + w[i] /*after*/ );
-				if (imp > BP_MINIMP * mean*mean) {
+				if (imp > BP_MINIMP /* * mean*mean */) {
 					binpack_solution_remove(s, i);
 					binpack_solution_add(s, i, j);
 					assert(binpack_is_feasible(s));
@@ -151,7 +153,7 @@ static bool first_imp_nh2( binpack_solution_t * s ) {
 											  bin[bi].load - w[i] + w[j]);
 						imp += std_diff(mean, bin[bj].load /*before*/,
 											  bin[bj].load + w[i] - w[j]);
-						if (imp > BP_MINIMP * mean*mean) {
+						if (imp > BP_MINIMP /* * mean*mean */) {
 							binpack_solution_swap(s, i, j);
 							assert(binpack_is_feasible(s));
 							return true;
@@ -186,7 +188,7 @@ static bool first_imp_nh3( binpack_solution_t * s ) {
 												  bin[bi].load -w[i]+w[j]+w[k]);
 							imp += std_diff(mean, bin[b].load /*before*/,
 												  bin[b].load +w[i]-w[j]-w[k]);
-							if (imp > BP_MINIMP * mean*mean) {
+							if (imp > BP_MINIMP /* * mean*mean */) {
 								binpack_solution_remove(s,k);
 								binpack_solution_swap(s, i, j);
 								binpack_solution_add(s, k, bi);
@@ -243,6 +245,7 @@ static void random_swaps( binpack_solution_t * s, unsigned int p ) {
 		} while (ba == bb ||
 				s->bins[ba].load - w[a] + w[b] > c ||
 				s->bins[bb].load + w[a] - w[b] > c );
+		binpack_solution_swap(s, a, b);
 	}
 	assert(binpack_is_feasible(s));
 }

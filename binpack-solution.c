@@ -59,6 +59,9 @@ void binpack_solution_destroy( binpack_solution_t * s ){
 			}
 			free(s->bins);
 		}
+		if (s->bin_of != NULL) {
+			free(s->bin_of);
+		}
 		free(s);
 	}
 }
@@ -172,10 +175,12 @@ double binpack_solution_eval( const binpack_solution_t * s ) {
 	double avg = (double) s->env->sum / s->size;
 	double std = 0;
 	for (size_t i = 0; i < s->size; ++i) {
-		std += s->bins[i].load * s->bins[i].load;
+		/* std += s->bins[i].load * s->bins[i].load; */
+		double x = s->bins[i].load - avg;
+		std =+ x * x;
 	}
-	std /= s->size;
-	std -= avg*avg;
+	/* std /= s->size; */
+	/* std -= avg*avg; */
 	/* std -= s->size * avg*avg; */
 	return std;
 }

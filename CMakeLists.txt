@@ -19,7 +19,7 @@ target_include_directories( binpack PUBLIC "${BinPacking_SOURCE_DIR}")
 add_executable(benchmark)
 target_sources( benchmark
 				PRIVATE "benchmark.c")
-target_link_libraries( benchmark PUBLIC binpack tinydir)
+target_link_libraries( benchmark PUBLIC binpack tinydir list)
 
 
 

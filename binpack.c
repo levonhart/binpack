@@ -73,8 +73,9 @@ void binpack_destroy(binpack_t * bp){
 	if (bp != NULL) {
 		if (bp->w != NULL)
 			free(bp->w);
-		if (bp->best != NULL)
-			free(bp->best);
+		if (bp->best != NULL) {
+			binpack_solution_destroy(bp->best);
+		}
 		free(bp);
 	}
 }
